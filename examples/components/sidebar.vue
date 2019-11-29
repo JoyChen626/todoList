@@ -19,6 +19,7 @@
 </template>
 
 <script>
+    import VueCookies from 'vue-cookies'
     export default {
         name: "sidebar",
         data(){
@@ -27,25 +28,32 @@
                 direction:'ltr',
                 drawer: this.$store.state.shownav,
                 innerDrawer: false,
-                activeNav: this.$store.state.activeNav,
+                activeNav: this.$route.meta.id,
                 activeTheme: this.$store.state.activeTheme,
-                navList: [{name: 'home',id:1,to:'/home'},{name: 'todo-list',id:2,to:'/onelist',status:1},{name: 'done-list',id:3,to:'/onelist',status:2},{name: 'delete-list',id:4,to:'/onelist',status:3},{name: 'theme',id:5},{name: '个人中心',id:6,to:'/my'}],
+                navList: [{name: 'home',id:1,to:'/home'},{name: 'todo-list',id:2,to:'/onelist?title=待做事项',status:1},{name: 'done-list',id:3,to:'/onelist?title=已完成事项',status:2},{name: 'delete-list',id:4,to:'/onelist?title=已取消事项',status:3},{name: 'theme',id:5},{name: '个人中心',id:6,to:'/my'},{name: '退出登录',id:7,to:'/login'}],
                 colorList: [{color:'#409eff',type:'primary'},{color:'#67c23a',type:'success'},{color:'#909399',type:'info'},{color:'#e6a23c',type:'warning'},{color:'#f56c6c',type:'danger'}]
             }
         },
         mounted(){},
         methods:{
             changeNav(item){
+                if(item.id == this.activeNav){return false}
                 this.activeNav = item.id;
-                this.$store.commit('ACTIVE_NAV',this.activeNav);
-                if(item.to){
-                    if(this.$route.path == item.to) {return false}
-                    this.$router.push({path:item.to});
+                if(item.id!=5&&item.id!=7){
+                    this.$store.commit('ACTIVE_NAV',this.activeNav);
                 }
                 if(item.id == 5){
                     this.innerDrawer = true
                 } else {
                     this.innerDrawer = false
+                }
+                if(item.id == 7){
+                    VueCookies.remove('todoCode');
+                    this.$store.commit('CHANGE_NAV',false);
+                }
+                if(item.to){
+                    if(this.$route.path == item.to) {return false}
+                    this.$router.push({path:item.to});
                 }
             },
             changeTheme(item){

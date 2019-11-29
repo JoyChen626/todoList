@@ -8,6 +8,8 @@ import store from '../store/index.js'
 import VueCookies from 'vue-cookies'
 import Vue from 'vue'
 import { Dialog } from 'vant';
+// 引入token模块
+var jwt = require('jsonwebtoken');
 
 // 全局注册
 Vue.use(Dialog);
@@ -37,7 +39,7 @@ axios.interceptors.response.use(
     response => {
         if (response.status === 200) {
             return Promise.resolve(response);
-        } else {
+        }else{
             return Promise.reject(response);
         }
     },
@@ -49,6 +51,7 @@ axios.interceptors.response.use(
                 // 未登录则跳转登录页面，并携带当前页面的路径
                 // 在登录成功后返回当前页面，这一步需要在登录页操作。
                 case 401:
+                    Dialog.alert({title: '提示',message: '未登录，请登录'});
                     router.replace({
                         path: '/login',
                         query: { redirect: router.currentRoute.fullPath }

@@ -20,11 +20,13 @@ export default new Router({
     {
       path: '/home',
       name: 'home',
-      component: Home
+      component: Home,
+      meta: {title:'home'}
     },{
       path: '/my',
       name: 'my',
-      component: resolve => require(['../views/my_edit'], resolve)
+      component: resolve => require(['../views/my_edit'], resolve),
+      meta: {title:'个人中心'}
     },{
       path: '/onelist',
       name: 'onelist',

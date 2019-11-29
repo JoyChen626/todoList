@@ -1,7 +1,7 @@
 <template>
     <div class="event-add">
         <el-input placeholder="请输入待办事项" v-model="content" @keyup.enter="submit">
-            <template slot="append" @click="submit">提交</template>
+            <el-button slot="append" @click="submit">提交</el-button>
         </el-input>
     </div>
 </template>
@@ -16,16 +16,18 @@
             }
         },
         methods: {
-            submit () {
+            submit() {
                 if(this.btnClock){return false}
                 if(this.content == ''){
+                    this.$message({ type: 'wanming', message: '内容不能为空!' });
                     return false;
                 }
                 this.btnClock = true;
                 apiaddThing({thing:this.content,userid:this.$store.state.userid}).then( res => {
                     this.btnClock = false;
                     if(res.code == 0){
-
+                        this.$store.commit('ADD_THING',res.item);
+                        this.$message({ type: 'success', message: '添加成功!' });
                     }
                 })
             }

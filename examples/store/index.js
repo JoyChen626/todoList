@@ -63,11 +63,10 @@ export default new Vuex.Store({
     username: default_username,
     shownav: false,
     activeNav: default_nav,
-    activeTheme: default_theme
+    activeTheme: default_theme,
+    addThing: null
   },
-  getters: {
-    newname: state => state.username
-  },
+  getters: { },
   mutations: {
     SET_TOKEN (state,token) {
       state.token = token;
@@ -81,6 +80,10 @@ export default new Vuex.Store({
     },
     CHANGE_NAME (state, name){
       state.username = name;
+      sessionStorage.username=name;
+    },
+    ADD_THING(state,data){
+      state.addThing = data;
     },
     CHANGE_LOADING (state, status) {
       state.loading = status;

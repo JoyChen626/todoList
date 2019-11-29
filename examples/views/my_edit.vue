@@ -33,7 +33,7 @@
         data(){
             return{
                 userid:this.$store.state.userid,
-                username:this.$store.getters.newname,
+                username:this.$store.state.username,
                 newname: '',
                 userphone:'',
                 userphoto:'',
@@ -48,37 +48,37 @@
                 this.userphone = res[0].userphone;
             })
         },
-        methods:{
+        methods: {
             beforeRead(file) {
-                if (file.type !== 'image/jpeg' && file.type !== 'image/png'&& file.type !== 'image/gif') {
+                if (file.type !== 'image/jpeg' && file.type !== 'image/png' && file.type !== 'image/gif') {
                     console.log('照片格式不正确');
                     return false;
                 }
                 return true;
             },
-            handleAvatarSuccess (data){
-                if(data.code == 0){
+            handleAvatarSuccess(data) {
+                if (data.code == 0) {
                     this.$message({message: '上传成功！', type: 'success'});
                     return false
                 }
             },
-            toEdit(){
+            toEdit() {
                 this.dialogFormVisible = true;
                 this.newname = this.username;
             },
-            updateName(){
-                if(this.username == ''){
+            updateName() {
+                if (this.username == '') {
                     this.$message({message: '昵称不能为空！', type: 'warning'});
                     return false;
                 } else {
-                    apiupdateUser({username: this.newname,userid: this.userid}).then( res => {
-                        if(res.code == 0){
+                    apiupdateUser({username: this.newname, userid: this.userid}).then(res => {
+                        if (res.code == 0) {
                             this.username = this.newname;
                             this.dialogFormVisible = false;
-                            this.$store.commit('CHANGE_NAME',this.username);
+                            this.$store.commit('CHANGE_NAME', this.username);
                             this.$message({message: '更新成功！', type: 'success'});
                         } else {
-                            this.$message({message: res.msg +'!', type: 'error'});
+                            this.$message({message: res.msg + '!', type: 'error'});
                         }
                     })
                 }

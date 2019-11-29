@@ -35,8 +35,8 @@
                 <ul v-if="list3.length>0">
                     <li v-for="(item,index) in list3" :key="index" class="clear">
                         <p class="left">{{item.thing}}</p>
-                        <p class="right">{{item.delete_at}}</p>
-                        <el-button class="right" size="small" type="danger" @click="to_delete(item,index)">取消</el-button>
+                        <p class="right">{{item.remove_at}}</p>
+                        <el-button class="right" size="small" type="danger" @click="to_delete(item,index)">删除</el-button>
                     </li>
                 </ul>
                 <p class="kong-tip" v-if="list3.length==0">暂无已取消事项</p>
@@ -79,7 +79,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    apiupdateThing({userid: item.userid, id: item.id, status: 2}).then(res => {
+                    apiupdateThing({userid: item.userid, status: 2,create_at:item.create_at,thing:item.thing}).then(res => {
                         if (res.code == 0) {
                             this.list1.splice(index, 1);
                             item.done_at = res.update_at;
@@ -103,7 +103,7 @@
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    apiupdateThing({userid: item.userid, id: item.id, status: 3}).then(res => {
+                    apiupdateThing({userid: item.userid, status: 3,create_at:item.create_at,thing:item.thing}).then(res => {
                         if (res.code == 0) {
                             if (item.status == 1) {
                                 this.list1.splice(index, 1);
@@ -146,6 +146,15 @@
                         message: '已取消操作'
                     });
                 });
+            }
+        },
+        computed: {
+            addThing(){return this.$store.state.addThing}
+        },
+        watch:{
+            addThing(data){
+                console.log(data)
+                this.list1.unshift(data);
             }
         }
     }

@@ -1,6 +1,6 @@
 <template>
     <header class="" :style="{background: this.$store.state.activeTheme.color}">
-        <div class="title">记事本
+        <div class="title">{{title}}
             <div class="box">
                 <img class="userphoto" :src="require('../../server/uploadFiles/file/'+userid+'.jpg')" alt="">
                 <span class="username">{{username}}</span>
@@ -10,11 +10,11 @@
     </header>
 </template>
 <script>
-    import {apigetUser} from '../api/api'
     export default {
         name:'todoheader',
         data () {
             return {
+                title: this.$route.meta.title?this.$route.meta.title:this.$route.query.title,
                 status: this.$store.state.shownav,
                 userid: this.$store.state.userid,
                 username:this.$store.state.username,
@@ -27,10 +27,14 @@
             }
         },
         computed:{
-            newStatus(){return this.$store.state.shownav}
+            newStatus(){return this.$store.state.shownav},
+            newName(){return this.$store.state.username},
+            newTitle(){return this.$route.query.title}
         },
         watch:{
-            newStatus(val){this.status = val}
+            newStatus(val){this.status = val},
+            newName(val){this.username = val},
+            newTitle(val){this.title = val}
         }
     }
 </script>

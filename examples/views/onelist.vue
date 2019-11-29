@@ -6,9 +6,9 @@
                 <el-table-column v-for="(item,index) in appTableConfigs" sortable :key="index" align="center" :prop="item.prop" :label="item.label" :width="item.width"></el-table-column>
                 <el-table-column align="center" fixed="right" label="操作" width="200">
                     <template slot-scope="scope">
-                        <el-button type="text" size="small" v-if="status == 1" @click="to_update(scope.row,2,index)">完成</el-button>
-                        <el-button type="text" size="small" v-if="status == 1 || status == 2" @click="to_update(scope.row,3,index)">取消</el-button>
-                        <el-button type="text" size="small" v-if="status == 3" @click="to_delete(scope.row, index)">删除</el-button>
+                        <el-button type="text" size="small" v-if="status == 1" @click="to_update(scope.row,2)">完成</el-button>
+                        <el-button type="text" size="small" v-if="status == 1 || status == 2" @click="to_update(scope.row,3)">取消</el-button>
+                        <el-button type="text" size="small" v-if="status == 3" @click="to_delete(scope.row)">删除</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -21,7 +21,7 @@
 </template>
 
 <script>
-    import {apigetoneThings,apiupdateThing} from '../api/api'
+    import {apigetoneThings,apiupdateThing,apideleteThing} from '../api/api'
     export default {
         name: "todolist",
         data(){
@@ -45,21 +45,21 @@
                     if (res.code == 0) {
                         this.total = res.total;
                         for(var i in res.list){
-                            res.list[i].time = this.status == 1 ? res.list[i].create_at : this.status == 2 ? res.list[i].done_at : res.list[i].delete_at;
+                            res.list[i].time = this.status == 1 ? res.list[i].create_at : this.status == 2 ? res.list[i].done_at : res.list[i].remove_at;
                         }
                         this.tableData = res.list;
                     }
                 })
             },
-            to_update(item,type, index) {
+            to_update(item,type) {
                 this.$confirm( '确定要将此事件转态改为'+(type==2?'已完成？':'已取消?')+'更改后不可撤回', '是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
-                    apiupdateThing({userid: item.userid, id: item.id, status: type}).then(res => {
+                    apiupdateThing({userid: item.userid, status: type,create_at:item.create_at,thing:item.thing}).then(res => {
                         if (res.code == 0) {
-                            this.list.splice(index, 1);
+                            this.tableData.splice(this.tableData.indexOf(item), 1);
                             item.done_at = res.update_at;
                             this.$message({
                                 type: 'success',
@@ -74,23 +74,24 @@
                     });
                 });
             },
-            to_delete(item, index) {
-                this.$confirm( '确定要移除此事件?移除后不可恢复', '是否继续?', '提示', {
+            to_delete(item) {
+                var self=this;
+                self.$confirm( '确定要移除此事件?移除后不可恢复', '是否继续?', '提示', {
                     confirmButtonText: '确定',
                     cancelButtonText: '取消',
                     type: 'warning'
                 }).then(() => {
                     apideleteThing({userid: item.userid, id: item.id}).then(res => {
                         if (res.code == 0) {
-                            this.list.splice(index, 1);
-                            this.$message({
+                            self.tableData.splice(self.tableData.indexOf(item), 1);
+                            self.$message({
                                 type: 'success',
                                 message: '移除成功!'
                             });
                         }
                     })
                 }).catch(() => {
-                    this.$message({
+                    self.$message({
                         type: 'info',
                         message: '已取消操作'
                     });

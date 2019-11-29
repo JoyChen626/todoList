@@ -8,6 +8,7 @@ var multer = require('multer');
 // 设置文件缓存的目录
 var upload = multer({ dest: '../../uploadFiles/tmp/'});
 //var globalObj = require('../../config'); //目录地址
+var jwt = require('jsonwebtoken');
 
 //验证码
 var verificationCode = '';
@@ -66,11 +67,16 @@ router.post('/addUser', (req, res) => {
                                 if (err4) {
                                     console.log(err4);
                                 }
-                                if (result4[0] === undefined) {
+                                var resultArray = result4[0];
+                                if (resultArray === undefined) {
                                     res.send({code:-1,msg:'无此用户名'})
                                 } else {
-                                    var resultArray = result4[0];
-                                    res.send({code:0,msg: '注册成功',userid:resultArray.userid,token: str_add(randomString(32,'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'),8,'-')})
+                                    var userid = resultArray.userid;
+                                    var username = resultArray.username;
+                                    var token = jwt.sign({userid, username }, 'canoe', {
+                                        expiresIn: 60*60*24// 授权时效24小时
+                                    })
+                                    res.send({code:0,msg: '登录成功',userid:resultArray.userid,token: token})
                                 }
                             })
                         }
@@ -118,7 +124,12 @@ router.post('/userLogin', (req, res) => {
         } else {
             var resultArray = result[0];
             if(resultArray.password === params.password) {
-                res.send({code:0,msg: '登录成功',userid:resultArray.userid,token: str_add(randomString(32,'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678'),8,'-')})
+                var userid = resultArray.userid;
+                var username = resultArray.username;
+                var token = jwt.sign({userid, username }, 'canoe', {
+                    expiresIn: 60*60*24// 授权时效24小时
+                })
+                res.send({code:0,msg: '登录成功',userid:resultArray.userid,token: token})
             } else {
                 res.send({code:-1,msg:'密码错误'})
             }
@@ -198,7 +209,7 @@ router.post('/modifyPassword', (req, res) => {
  * thing表
  * ***/
 //获取列表数据
-router.get('/getThings', ( req, res) => {
+router.get('/getThings', ( req, res ) => {
     var params = req.query;
     var sql_thing = $sql.thing.get + 'where userid = ' + params.userid;
     conn.query(sql_thing, [params.userid], function(err, result) {
@@ -274,7 +285,7 @@ router.post('/addThing', (req, res) => {
         if (result === undefined) {
             res.send({code:-1,msg:'添加失败，请联系管理员'})
         } else {
-            res.send({code:0,msg:'ok'});
+            res.send({code:0,item: {thing: params.thing,create_at:time,userid: params.userid, status: 1}});
         }
     })
 });
@@ -283,23 +294,30 @@ router.post('/addThing', (req, res) => {
 router.post('/updateThing', (req, res) => {
     var sql_update = $sql.thing.updata_thing;
     var params = req.body;
-    var time = getTime();
-    if(params.status == 1){
-        sql_update  += "status = " + params.status + ", done_at = '" + time +
-            "' where id = "+ params.id + " and userid = "+params.userid;
-    } else {
-        sql_update  += "status = " + params.status + ", remove_at = '" + time +
-            "' where id = "+ params.id + " and userid = "+params.userid;
-    }
-    conn.query(sql_update, params.status, function(err, result) {
+    var sql_item = "select * from thing where userid ='"+params.userid+"' and create_at ='"+params.create_at + "' and thing = '"+ params.thing+"'";
+    conn.query(sql_item, [params.userid,params.create_at,params.thing], function(err, result) {
         if (err) {
             console.log(err);
         }
-        if (result === undefined) {
-            res.send({code:-1,msg:'更新失败，请联系管理员'})
+        var time = getTime();
+        if(params.status == 2){
+            sql_update  += "status = " + params.status + ", done_at = '" + time +
+                "' where id = "+ result[0].id + " and userid = "+params.userid;
         } else {
-            res.send({code:0,msg:'ok',update_at:time});
+            sql_update  += "status = " + params.status + ", remove_at = '" + time +
+                "' where id = "+ result[0].id + " and userid = "+params.userid;
         }
+        conn.query(sql_update, params.status, function(err1, result1) {
+            if (err1) {
+                console.log(err1);
+            }
+            if (result1 === undefined) {
+                res.send({code:-1,msg:'更新失败，请联系管理员'})
+            } else {
+                res.send({code:0,msg:'ok',update_at:time});
+            }
+        })
+
     })
 });
 

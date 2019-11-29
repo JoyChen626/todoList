@@ -2,7 +2,7 @@
     <div class="Login">
         <div class="box">
             <div class="logo-box">
-                <el-image style="width: 100px; height: 100px" src="https://img.yzcdn.cn/vant/cat.jpeg" :fit="cover"></el-image>
+                <el-image style="width: 100px; height: 100px" src="https://img.yzcdn.cn/vant/cat.jpeg" fit="fit"></el-image>
             </div>
             <div class="center">
                 <div class="input-box">
@@ -87,7 +87,11 @@
                                 this.$message({message: '登录成功！', type: 'success'});
                                 var self = this;
                                 setTimeout( () => {
-                                    self.$router.push({path: '/home'});
+                                    if(self.$route.query.redirect){
+                                        self.$router.push({path: self.$route.query.redirect});
+                                    } else{
+                                        self.$router.push({path: '/home'});
+                                    }
                                 },2000)
                             } else {
                                 this.$alert(res.msg+'！', '提示', {confirmButtonText: '确定'});
