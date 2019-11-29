@@ -33,7 +33,7 @@
     }
 </script>
 
-<style lang="scss" rel="stylesheet/scss">
+<style lang="scss" rel="stylesheet/scss" scoped>
     .event-add{
         position: relative;
         padding:30px 90px 30px 0;

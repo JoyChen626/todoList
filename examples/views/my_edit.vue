@@ -3,41 +3,49 @@
         <todoheader></todoheader>
         <div class="box">
             <div class="logo-box">
-                <span class="bj" v-show="showphoto" @click="changephoto()" v-if="showphoto">编辑</span>
-                <el-image style="width: 88px; height: 88px" :src="userphoto" fit="fit" v-if="showphoto"></el-image>
-                <el-upload v-if="!showphoto" class="avatar-uploader" :action="action" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeRead">
-                    <img v-if="userphone" :src="userphone" class="avatar">
-                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                <p>点击头像更新</p>
+                <el-upload class="avatar-uploader" :action="action" :data="datas" :show-file-list="false" :on-success="handleAvatarSuccess" :before-upload="beforeRead">
+                    <img style="width: 100px; height: 100px" :src="require('../../server/uploadFiles/file/'+userid+'.jpg')" class="avatar">
                 </el-upload>
             </div>
-            <p>{{username}}</p>
+            <p><span class="word">{{username}}</span><span class="edit" @click="toEdit()">编辑</span></p>
             <p>{{userphone}}</p>
         </div>
         <todofooter></todofooter>
+        <el-dialog title="修改昵称" :visible.sync="dialogFormVisible" width="400px" center>
+            <el-form label-width="65px" @submit.native.prevent>
+                <el-form-item label="新昵称">
+                    <el-input v-model="newname" placeholder="请输入新昵称"></el-input>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取 消</el-button>
+                <el-button type="primary" @click="updateName()">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
 </template>
 
 <script>
-    import {apigetUser} from '../api/api'
+    import {apigetUser,apiupdateUser} from '../api/api'
     export default {
         name: "myEdit",
         data(){
             return{
-                fileList:[],
-                username:'',
+                userid:this.$store.state.userid,
+                username:this.$store.getters.newname,
+                newname: '',
                 userphone:'',
                 userphoto:'',
                 showphoto: true,
-                action: ''
+                action: '/api/todoList/upload',
+                datas: {userid: this.$store.state.userid},
+                dialogFormVisible:false
             }
         },
         mounted(){
             apigetUser({userid:this.$store.state.userid}).then(res => {
-                this.username = res[0].username;
                 this.userphone = res[0].userphone;
-                return false
-                this.userphoto = require('../../server/'+res[0].userphoto);
-
             })
         },
         methods:{
@@ -48,24 +56,32 @@
                 }
                 return true;
             },
-            changephoto(){
-                this.showphoto = false;
+            handleAvatarSuccess (data){
+                if(data.code == 0){
+                    this.$message({message: '上传成功！', type: 'success'});
+                    return false
+                }
             },
-            // 文件上传
-            onchange (){
-                let formData = new FormData;
-                formData.append('file',this.fileList[0].file);
-                formData.append('userid',this.$store.state.userid);
-                const instance= axios.create({
-                    withCredentials: true
-                })
-                instance.post('/api/todoList/upload', formData)
-                    .then(res => {
-                       if(res.data.code == 0){
-                           this.$notify({ type: 'primary', message: '上传成功', duration: 2000 });
-                           return false
-                       }
+            toEdit(){
+                this.dialogFormVisible = true;
+                this.newname = this.username;
+            },
+            updateName(){
+                if(this.username == ''){
+                    this.$message({message: '昵称不能为空！', type: 'warning'});
+                    return false;
+                } else {
+                    apiupdateUser({username: this.newname,userid: this.userid}).then( res => {
+                        if(res.code == 0){
+                            this.username = this.newname;
+                            this.dialogFormVisible = false;
+                            this.$store.commit('CHANGE_NAME',this.username);
+                            this.$message({message: '更新成功！', type: 'success'});
+                        } else {
+                            this.$message({message: res.msg +'!', type: 'error'});
+                        }
                     })
+                }
             }
         }
     }
@@ -78,24 +94,21 @@
         margin: 0 auto;
     }
     .logo-box{
+        width: 100px;
         text-align: center;
-        margin: 60px 0 0 0;
+        margin: 60px auto 0 auto;
         position: relative;
-        .bj{
-            position: absolute;
-            line-height: 30px;
+        p{
             height: 30px;
-            width: 60px;
-            border: 1px solid #ffffff;
+            line-height: 30px;
             text-align: center;
-            font-size: 14px;
-            color: #ffffff;
-            top: 50%;
-            left: 50%;
-            margin-left: -30px;
-            margin-top: -15px;
-            z-index: 99;
-            cursor: pointer;
+            font-size: 12px;
+            color: white;
+            background: rgba(0,0,0,.5);
+            position: absolute;
+            left: 0;
+            bottom: 4px;
+            width: 100%;
         }
     }
     p{
@@ -103,5 +116,16 @@
         line-height: 30px;
         height: 30px;
         font-size: 14px;
+        .word{
+            min-width: 10%;
+            text-align: right;
+        }
+        .edit{
+            text-decoration: underline;
+            margin-left: 10px;
+            font-size: 12px;
+            color: lightcoral;
+            cursor: pointer;
+        }
     }
 </style>

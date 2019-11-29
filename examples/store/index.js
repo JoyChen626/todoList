@@ -35,6 +35,16 @@ try{
 }catch (e) {
   default_userid = '1';
 }
+let default_username;
+try{
+  if(sessionStorage.username){
+    default_username = sessionStorage.username;
+  } else {
+    default_username = '';
+  }
+}catch (e) {
+  default_userid = '';
+}
 let default_theme;
 try{
   if(sessionStorage.activeTheme){
@@ -50,21 +60,27 @@ export default new Vuex.Store({
   state: {
     token: default_token,
     userid: default_userid,
+    username: default_username,
     shownav: false,
     activeNav: default_nav,
     activeTheme: default_theme
   },
   getters: {
-
+    newname: state => state.username
   },
   mutations: {
     SET_TOKEN (state,token) {
       state.token = token;
       VueCookies.set('todoCode', state.token, '3d');
     },
-    SAVE_USER (state, id) {
-      sessionStorage.userid = id;
-      state.userid = id;
+    SAVE_USER (state, data) {
+      sessionStorage.userid = data.id;
+      sessionStorage.username = data.name;
+      state.userid = data.id;
+      state.username = data.name;
+    },
+    CHANGE_NAME (state, name){
+      state.username = name;
     },
     CHANGE_LOADING (state, status) {
       state.loading = status;

@@ -151,18 +151,25 @@ router.post('/updateUser', (req, res) => {
     var params = req.body;
     if (params.userid) {
         sql_update  += "username = '" + params.username +
-            "',userphone = '" + params.userphone +
-            "',userphoto = '" + params.userphoto +
             "' where userid ='"+ params.userid + "'";
     }
-    conn.query(sql_update, params.userid, function(err, result) {
+    conn.query("select * from user where username ='" + params.username+"'", params.username,function (err,result) {
         if (err) {
             console.log(err);
         }
-        if (result.affectedRows === undefined) {
-            res.send({code:-1,msg:'更新失败，请联系管理员'})
+        if (result[0] !== undefined) {
+            res.send({code: -1, msg: '此用户名已存在'})
         } else {
-            res.send({code:0,msg:'ok'});
+            conn.query(sql_update, params.userid, function(err1, result1) {
+                if (err1) {
+                    console.log(err1);
+                }
+                if (result1 === undefined) {
+                    res.send({code:-1,msg:'更新失败，请联系管理员'})
+                } else {
+                    res.send({code:0,msg:'ok'});
+                }
+            })
         }
     })
 });

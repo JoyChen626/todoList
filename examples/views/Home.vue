@@ -12,10 +12,13 @@
 <script>
 
 export default {
-  name: 'home'
+  name: 'home',
+  mounted(){
+
+  }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
   .box{
     max-width: 800px;
     width: 100%;

@@ -83,7 +83,7 @@
                             if (res.code == 0) {
                                 this.btnClock = true;
                                 this.set_token(res.token);
-                                this.save_userinfo(res.userid);
+                                this.save_userinfo({id:res.userid,name:this.username});
                                 this.$message({message: '登录成功！', type: 'success'});
                                 var self = this;
                                 setTimeout( () => {
@@ -116,7 +116,7 @@
                             if(res.code == 0) {
                                 this.$message({message: '注册成功，将为您自动登录！', type: 'success'});
                                 this.set_token(res.token);
-                                this.save_userinfo(res.userid);
+                                this.save_userinfo({id:res.userid,name:this.username});
                                 setTimeout( () =>{
                                     self.$router.push({path:'/home'});
                                 },2000)
